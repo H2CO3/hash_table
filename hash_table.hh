@@ -214,7 +214,7 @@ public:
 	}
 
 	// naive implementation, may be improved. not sure if worth the effort.
-	hash_table(std::initializer_list<KeyValue> elems) : hash_table() {
+	hash_table(std::initializer_list<KeyValue> elems) : hash_table(elems.size()) {
 		for (auto &elem : elems) {
 			// cannot move from an initializer_list
 			set(elem.key, elem.value);
