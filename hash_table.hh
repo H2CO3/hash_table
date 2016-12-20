@@ -193,10 +193,13 @@ public:
 	hash_table() noexcept: slots {}, count { 0 }, max_hash_offset { 0 } {}
 
 	hash_table(size_t capacity) noexcept: hash_table() {
-		// make sure the real capacity is a power of two >= 8
+		// Make sure the real capacity is a power of two >= 8.
+		// We should also keep in mind that the number of elements
+		// is at most 3/4 of the number of slots!
+		size_t min_num_slots = (capacity * 4 + 2) / 3; // round up
 		size_t real_cap = 8;
 
-		while (real_cap < capacity) {
+		while (real_cap < min_num_slots) {
 			real_cap *= 2;
 		}
 
