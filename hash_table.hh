@@ -264,14 +264,45 @@ public:
 		return nullptr;
 	}
 
-	Value get_or(const Key &key, Value defaultValue) const {
+	Value get_or(const Key &key, const Value &defaultValue) const {
 		if (Slot *slot = get_slot(key)) {
 			return slot->kv.value;
 		}
 		return defaultValue;
 	}
 
-	Value *set(Key key, Value value) {
+	Value get_or(const Key &key, Value &&defaultValue) const {
+		if (Slot *slot = get_slot(key)) {
+			return slot->kv.value;
+		}
+		return std::move(defaultValue);
+	}
+
+	Value &get_or(const Key &key, Value &defaultValue) const {
+		if (Slot *slot = get_slot(key)) {
+			return slot->kv.value;
+		}
+		return defaultValue;
+	}
+
+	Value *set(const Key &key, Value value) {
+		// if the key is already in the table, just replace it and move on
+		if (Value *candidate = get(key)) {
+			*candidate = std::move(value);
+			return candidate;
+		}
+
+		// else we need to insert it. First, check if we need to expand.
+		if (should_rehash()) {
+			rehash();
+		}
+
+		// then we actually insert the key.
+		auto kv = insert_nonexistent_norehash(key, std::move(value));
+		return &kv->value;
+	}
+
+	Value *set(Key &&key, Value value) {
 		// if the key is already in the table, just replace it and move on
 		if (Value *candidate = get(key)) {
 			*candidate = std::move(value);
