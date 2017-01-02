@@ -438,14 +438,28 @@ public:
 	public:
 		iterator(const const_iterator &other) : const_iterator(other) {}
 
-		KeyValue &operator*() {
+		KeyValue &operator*() const {
 			return *operator->();
 		}
 
-		KeyValue *operator->() {
+		KeyValue *operator->() const {
 			return const_cast<KeyValue *>(
-				static_cast<const_iterator *>(this)->operator->()
+				static_cast<const const_iterator *>(this)->operator->()
 			);
+		}
+
+		iterator &operator++() {
+			assert(this->slot_index < this->owner->slots.size() && "cannot increment end iterator");
+			do {
+				this->slot_index++;
+			} while (this->slot_index < this->owner->slots.size() && not this->owner->slots[this->slot_index].used);
+			return *this;
+		}
+
+		iterator operator++(int) {
+			auto prev(*this);
+			++*this;
+			return prev;
 		}
 	};
 
