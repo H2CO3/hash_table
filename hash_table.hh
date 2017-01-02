@@ -435,8 +435,10 @@ public:
 	private:
 		friend struct hash_table;
 
-	public:
 		iterator(const const_iterator &other) : const_iterator(other) {}
+
+	public:
+		iterator(const iterator &other) : const_iterator(other) {}
 
 		KeyValue &operator*() const {
 			return *operator->();
