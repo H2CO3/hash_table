@@ -32,7 +32,20 @@ public:
 		Value value;
 	};
 
-protected:
+	// stlib-traits-friendly typedefs
+	using key_type        = Key;
+	using mapped_type     = Value;
+	using value_type      = KeyValue;
+	using size_type       = std::size_t;
+	using difference_type = std::ptrdiff_t;
+	using hasher          = Hash;
+	using key_equal       = Equal;
+	using reference       = value_type &;
+	using const_reference = const value_type &;
+	using pointer         = value_type *;
+	using const_pointer   = const value_type *;
+
+private:
 
 	struct Slot {
 		KeyValue kv;
@@ -73,18 +86,18 @@ protected:
 	};
 
 	std::vector<Slot> slots;
-	size_t count;
-	size_t max_hash_offset;
+	std::size_t count;
+	std::size_t max_hash_offset;
 
 	// the sole purpose of this function is that we can
 	// explicitly call const member functions on 'this'.
 	auto cthis() const { return this; }
 
-	size_t key_index(const Key &key) const {
+	std::size_t key_index(const Key &key) const {
 		return Hash{}(key) & mask();
 	}
 
-	size_t mask() const {
+	std::size_t mask() const {
 		assert(
 			slots.size() && !(slots.size() & (slots.size() - 1)) &&
 			"table size must be a power of two"
@@ -106,8 +119,8 @@ protected:
 			return nullptr;
 		}
 
-		size_t i = key_index(key);
-		size_t hash_offset = 0;
+		std::size_t i = key_index(key);
+		std::size_t hash_offset = 0;
 
 		// linear probing using a cached maximal probe sequence length.
 		// This avoids the need to mark deleted slots as special and
@@ -135,8 +148,8 @@ protected:
 		assert(size() < slots.size()); // requires empty slots
 		assert(cthis()->get_slot(key) == nullptr);
 
-		size_t i = key_index(key);
-		size_t hash_offset = 0;
+		std::size_t i = key_index(key);
+		std::size_t hash_offset = 0;
 
 		// first, find an empty (unused) slot
 		while (slots[i].used) {
@@ -163,7 +176,7 @@ protected:
 
 	void rehash() {
 		// compute new size. Must be a power of two.
-		const size_t new_size = slots.empty() ? 8 : slots.size() * 2;
+		const std::size_t new_size = slots.empty() ? 8 : slots.size() * 2;
 
 		// move original slot array out of *this and reset internal state
 		auto old_slots = std::move(slots);
@@ -192,12 +205,12 @@ public:
 	//////////////////
 	hash_table() noexcept: slots {}, count { 0 }, max_hash_offset { 0 } {}
 
-	hash_table(size_t capacity) noexcept: hash_table() {
+	hash_table(std::size_t capacity) noexcept: hash_table() {
 		// Make sure the real capacity is a power of two >= 8.
 		// We should also keep in mind that the number of elements
 		// is at most 3/4 of the number of slots!
-		size_t min_num_slots = (capacity * 4 + 2) / 3; // round up
-		size_t real_cap = 8;
+		std::size_t min_num_slots = (capacity * 4 + 2) / 3; // round up
+		std::size_t real_cap = 8;
 
 		while (real_cap < min_num_slots) {
 			real_cap *= 2;
@@ -331,7 +344,7 @@ public:
 		}
 	}
 
-	size_t size() const {
+	std::size_t size() const {
 		return count;
 	}
 
@@ -343,7 +356,7 @@ public:
 		return double(size()) / slots.size();
 	}
 
-	// Default-constructing indexing operator
+	// Default-constructing indexing operators
 	Value &operator[](const Key &key) {
 		// if the value already exists, return a reference to it
 		if (Value *value = get(key)) {
@@ -355,6 +368,17 @@ public:
 		return *set(key, {});
 	}
 
+	Value &operator[](Key &&key) {
+		// if the value already exists, return a reference to it
+		if (Value *value = get(key)) {
+			return *value;
+		}
+
+		// if it doesn't, then default-construct and insert it,
+		// then return a reference to the newly-added value.
+		return *set(std::move(key), {});
+	}
+
 	//////////////////
 	// Iterator API //
 	//////////////////
@@ -364,9 +388,9 @@ public:
 		friend struct hash_table;
 
 		const hash_table *owner;
-		size_t slot_index;
+		std::size_t slot_index;
 
-		const_iterator(const hash_table *p_owner, size_t p_slot_index) :
+		const_iterator(const hash_table *p_owner, std::size_t p_slot_index) :
 			owner(p_owner),
 			slot_index(p_slot_index)
 		{}
@@ -408,7 +432,7 @@ public:
 	};
 
 	struct iterator : public const_iterator {
-	protected:
+	private:
 		friend struct hash_table;
 
 	public:
