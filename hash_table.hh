@@ -277,7 +277,7 @@ public:
 		return nullptr;
 	}
 
-	Value get_or(const Key &key, const Value &defaultValue) const {
+	const Value &get_or(const Key &key, const Value &defaultValue) const {
 		if (Slot *slot = get_slot(key)) {
 			return slot->kv.value;
 		}
@@ -285,13 +285,13 @@ public:
 	}
 
 	Value get_or(const Key &key, Value &&defaultValue) const {
-		if (Slot *slot = get_slot(key)) {
+		if (const Slot *slot = get_slot(key)) {
 			return slot->kv.value;
 		}
 		return std::move(defaultValue);
 	}
 
-	Value &get_or(const Key &key, Value &defaultValue) const {
+	Value &get_or(const Key &key, Value &defaultValue) {
 		if (Slot *slot = get_slot(key)) {
 			return slot->kv.value;
 		}
