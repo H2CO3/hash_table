@@ -7,8 +7,8 @@
 // Licensed under the 2-clause BSD License
 //
 
-#ifndef SHC_HASH_TABLE_HH
-#define SHC_HASH_TABLE_HH
+#ifndef H2CO3_HASH_TABLE_HH
+#define H2CO3_HASH_TABLE_HH
 
 #include <vector>
 #include <functional>
@@ -16,6 +16,8 @@
 #include <cstdlib>
 #include <cassert>
 
+
+namespace h2co3 {
 
 template<
 	typename Key,
@@ -510,4 +512,6 @@ public:
 	}
 };
 
-#endif // SHC_HASH_TABLE_HH
+}
+
+#endif // H2CO3_HASH_TABLE_HH
