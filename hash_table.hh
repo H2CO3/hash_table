@@ -15,6 +15,7 @@
 #include <type_traits>
 #include <cstdlib>
 #include <cassert>
+#include <cstdio>
 
 
 namespace h2co3 {
@@ -380,6 +381,16 @@ public:
 		// then return a reference to the newly-added value.
 		return *set(std::move(key), {});
 	}
+
+    const Value &operator[](const Key &key) const {
+        if (const Value *value = get(key)) {
+            return *value;
+        }
+
+        std::fprintf(stderr, "hash_table::operator[] failed: key does not exist\n");
+        std::fflush(stderr);
+        abort();
+    }
 
 	//////////////////
 	// Iterator API //
