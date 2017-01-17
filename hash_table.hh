@@ -113,7 +113,7 @@ private:
 		// keep load factor below 0.75
 		// this ratio is chosen carefully so that it can be optimized well:
 		// it is equivalent with ((size << 1) + size) >> 2.
-		return slots.empty() || count > slots.size() * 3 / 4;
+		return slots.empty() || count >= slots.size() * 3 / 4;
 	}
 
 	const Slot *get_slot(const Key &key) const {
